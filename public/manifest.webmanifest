@@ -1,0 +1,16 @@
+{
+  "id": "/Ca-a-Palavras/",
+  "name": "WordQuest — Caça-Palavras",
+  "short_name": "WordQuest",
+  "description": "Caça-palavras para jogar no computador ou Android.",
+  "lang": "pt-BR",
+  "start_url": "/Ca-a-Palavras/",
+  "scope": "/Ca-a-Palavras/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    { "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
