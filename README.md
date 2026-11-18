@@ -39,6 +39,7 @@ npm run dev
 - Dificuldades: Fácil, Médio e Difícil.
 - Grade dinâmica com palavras na horizontal, vertical e diagonal, inclusive ao contrário.
 - Seleção por mouse ou toque, com destaque das palavras encontradas.
+- Limite de **3 dicas por partida**; o contador mostra quantas foram usadas e quantas ainda restam.
 - Interface adaptada a telas de celular Android.
 - Instalação como aplicativo PWA e cache básico para uso offline.
-- Cronômetro, progresso, dica, pontuação e botão Novo Jogo.
+- Cronômetro, progresso, pontuação e botão Novo Jogo.
