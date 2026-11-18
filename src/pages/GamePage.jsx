@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Clock3, Lightbulb, RotateCcw, Trophy } from 'lucide-react'
 import { DIFFICULTIES, THEMES } from '../utils/wordBank.js'
-import { createPuzzle, getStraightLine, lineKey } from '../utils/game.js'
+import { createPuzzle, getStraightLine } from '../utils/game.js'
 
+const MAX_HINTS = 3
 const formatTime = seconds => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
 
 export default function GamePage() {
@@ -19,7 +20,8 @@ export default function GamePage() {
   const [seconds, setSeconds] = useState(0)
   const [selection, setSelection] = useState([])
   const [dragging, setDragging] = useState(false)
-  const [hint, setHint] = useState(false)
+  const [hintsUsed, setHintsUsed] = useState(0)
+  const [hintWord, setHintWord] = useState(null)
   const boardRef = useRef(null)
 
   useEffect(() => {
@@ -34,7 +36,6 @@ export default function GamePage() {
     }
   }, [found, words, navigate, theme.label, level.label])
 
-  const selectedKey = lineKey(selection)
   const foundCells = useMemo(() => {
     const keys = new Set()
     found.forEach(word => puzzle.placements[word]?.forEach(cell => keys.add(`${cell.row}-${cell.col}`)))
@@ -71,12 +72,25 @@ export default function GamePage() {
     setSelection([point])
   }
 
-  function newGame() {
-    setFound([]); setSeconds(0); setSelection([]); setDragging(false); setHint(false); setRound(value => value + 1)
+  function requestHint() {
+    if (hintsUsed >= MAX_HINTS) return
+    const nextWord = words.find(word => !found.includes(word))
+    if (!nextWord) return
+    setHintWord(nextWord)
+    setHintsUsed(value => value + 1)
   }
 
-  const hintWord = words.find(word => !found.includes(word))
-  const hintCells = hint && hintWord ? puzzle.placements[hintWord] : []
+  function newGame() {
+    setFound([])
+    setSeconds(0)
+    setSelection([])
+    setDragging(false)
+    setHintsUsed(0)
+    setHintWord(null)
+    setRound(value => value + 1)
+  }
+
+  const hintCells = hintWord && !found.includes(hintWord) ? puzzle.placements[hintWord] : []
 
   return (
     <main className="page-shell game-page">
@@ -97,7 +111,7 @@ export default function GamePage() {
         </section>
         <aside className="words-card"><div className="words-card-heading"><div><span className="eyebrow">SUA MISSÃO</span><h2>Palavras</h2></div><span className="word-total">{found.length}/{words.length}</span></div>
           <div className="word-list">{words.map(word => <div className={`word-item ${found.includes(word) ? 'word-found' : ''}`} key={word}><span className="word-status">{found.includes(word) ? '✓' : '•'}</span><span>{word}</span>{found.includes(word) && <small>ENCONTRADA</small>}</div>)}</div>
-          <div className="words-actions"><button className="hint-button" onClick={() => setHint(value => !value)}><Lightbulb size={16} /> {hint ? 'Ocultar dica' : 'Dar uma dica'}</button><p>As palavras podem aparecer na horizontal, vertical e diagonal.</p></div>
+          <div className="words-actions"><button className="hint-button" onClick={requestHint} disabled={hintsUsed >= MAX_HINTS || found.length === words.length}><Lightbulb size={16} /> {hintsUsed >= MAX_HINTS ? 'Limite de dicas atingido' : 'Pedir dica'}</button><p>{hintsUsed} de {MAX_HINTS} dicas usadas. {MAX_HINTS - hintsUsed} restantes.</p><p>As palavras podem aparecer na horizontal, vertical e diagonal.</p></div>
           <div className="score-mini"><Trophy size={18} /><div><strong>{found.length * 100} pts</strong><small>Pontuação atual</small></div></div>
         </aside>
       </div>
