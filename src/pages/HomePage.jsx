@@ -1,12 +1,33 @@
-﻿import { useNavigate } from 'react-router-dom'
-import { ArrowRight, Clock3, Search, Sparkles } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ArrowRight, Clock3, Download, Search, Sparkles } from 'lucide-react'
 import { DIFFICULTIES, THEMES } from '../utils/wordBank.js'
 
 export default function HomePage() {
   const navigate = useNavigate()
   const [theme, setTheme] = useState('animais')
   const [difficulty, setDifficulty] = useState('medio')
+  const [installPrompt, setInstallPrompt] = useState(null)
+  const [installHelp, setInstallHelp] = useState(false)
+
+  useEffect(() => {
+    const handleInstall = (event) => {
+      event.preventDefault()
+      setInstallPrompt(event)
+    }
+    window.addEventListener('beforeinstallprompt', handleInstall)
+    return () => window.removeEventListener('beforeinstallprompt', handleInstall)
+  }, [])
+
+  async function installApp() {
+    if (!installPrompt) {
+      setInstallHelp(true)
+      return
+    }
+    installPrompt.prompt()
+    await installPrompt.userChoice
+    setInstallPrompt(null)
+  }
 
   function startGame() {
     navigate('/jogar', { state: { theme, difficulty, startedAt: Date.now() } })
@@ -14,13 +35,15 @@ export default function HomePage() {
 
   return (
     <main className="page-shell home-page">
-      <header className="topbar"><a className="brand" href="/"><span className="brand-icon"><Search size={21} /></span> WORD<span>QUEST</span></a><span className="top-note"><Sparkles size={15} /> Treine sua mente</span></header>
+      <header className="topbar"><a className="brand" href="./"><span className="brand-icon"><Search size={21} /></span> WORD<span>QUEST</span></a><span className="top-note"><Sparkles size={15} /> Treine sua mente</span></header>
       <section className="hero">
         <div className="hero-copy">
           <span className="eyebrow">DESAFIO DE PALAVRAS</span>
           <h1>Encontre as palavras.<br /><span>Desafie sua mente.</span></h1>
           <p>Explore a grade, descubra palavras escondidas em todas as direções e tente bater seu próprio recorde.</p>
           <div className="hero-stats"><div><strong>04</strong><small>temas</small></div><i /><div><strong>03</strong><small>dificuldades</small></div><i /><div><strong>∞</strong><small>diversão</small></div></div>
+          <button className="install-app-button" type="button" onClick={installApp}><Download size={16} /> Instalar no Android</button>
+          {installHelp && <p className="install-help">No Chrome do Android, toque em ⋮ e escolha “Instalar app” ou “Adicionar à tela inicial”.</p>}
         </div>
         <div className="hero-art" aria-hidden="true"><div className="art-glow" /><div className="letter-card"><div className="letter-grid">{['P','A','L','A','V','R','A','S','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J'].map((l, i) => <span className={ [2,3,4,9,14,19].includes(i) ? 'marked' : '' } key={i}>{l}</span>)}</div><span className="floating-star">✦</span></div><div className="art-pill"><span>✦</span> Encontre todas!</div></div>
       </section>
