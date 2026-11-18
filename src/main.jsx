@@ -5,8 +5,30 @@ import App from './App.jsx'
 import './styles.css'
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL }).catch(console.error)
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register(
+        `${import.meta.env.BASE_URL}sw.js`,
+        { scope: import.meta.env.BASE_URL, updateViaCache: 'none' }
+      )
+
+      // Verifica atualizações ao abrir o jogo e sempre que o usuário voltar à aba.
+      await registration.update()
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') registration.update().catch(console.error)
+      })
+      window.addEventListener('focus', () => registration.update().catch(console.error))
+
+      // Quando uma versão nova assume o controle, recarrega automaticamente uma única vez.
+      let refreshing = false
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return
+        refreshing = true
+        window.location.reload()
+      })
+    } catch (error) {
+      console.error('Não foi possível atualizar o WordQuest:', error)
+    }
   })
 }
 
